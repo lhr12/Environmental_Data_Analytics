@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Reproducibility, Workflow, Version Control"
-author: "Student Name"
+author: "Lindsay Roth"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,22 +30,22 @@ The completed exercise is due on Thursday, 17 January, 2018 before class begins.
 ### Question
 Why are reproducible practices becoming the norm in data analytics?
 
-> Answer: 
+> Answer: Reproducible practices are becoming the norm in data analytics because it is important to be able to go back to your own work or someone elses work and be able to understand what was done so that you can use those methods in your future work.
 
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have taken the Statistics class at the Nicholas School with John Poulsen using R. Before that I had no other experience with R, data analytics, coding, or Git.
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I feel confident in my abilities to understand the grammar of R code and be able to use the various functions in R to help me solve problems. 
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I am a little apprehensive about connecting R Studio with the cloud and using GitHub to manage my assignments. Additionally, I would like to work on my trouble shooting skills to be able to fix any issues I am having independently.
 
 
 ## 2) GitHub
@@ -53,6 +53,6 @@ Are there any components of the course about which you feel apprehensive?
 ### Your Repository
 Provide a link below to your course repository in GitHub. Make sure you have pulled all recent changes from the course repository (https://github.com/KateriSalk/Environmental_Data_Analytics) and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/lhr12/Environmental_Data_Analytics
 
 
