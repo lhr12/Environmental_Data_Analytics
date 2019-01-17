@@ -3,7 +3,7 @@ Data analytics course for Duke University. Course code: ENV 872L
 
 <<<<<<< HEAD
 ## User:Lindsay Roth
-=======
+======= 
 ## User: Kateri Salk
 <<<<<<< HEAD
 >>>>>>> 81f8a2ffece12327680d526a23241130673f08dd
