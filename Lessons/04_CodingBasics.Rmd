@@ -19,6 +19,7 @@ R treats objects differently based on their characteristics. For more informatio
 * **Vectors** 1 dimensional structure that contains elements of the same type.
 
 * **Matrices** 2 dimensional structure that contains elements of the same type.
+multiple rows and columns
 
 * **Arrays** Similar to matrices, but can have more than 2 dimensions. We will not delve into arrays in depth.
 
@@ -36,58 +37,58 @@ vector2
 vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
 vector3
 
-vector1[3] # 
+vector1[3] # choosing the third element of vector
 
 # Matrices ----
-matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # take numbers 1 through 20 and put into 5 rows and 4 columns
 matrix1
-matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) # same as matrix 1 but counts by row, not column (which is the default)
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
-                                  c("un", "deux", "trois", "cat"))) #
-matrix3
+                                  c("un", "deux", "trois", "cat"))) #tells R to name rows (first) and columns (second) using dimnames
+matrix3["uno",]
 
-matrix1[4, ] #
-matrix1[ , 3] #
-matrix1[c(12, 14)] #
-matrix1[c(12:14)] #
-matrix1[2:4, 1:3] #
+matrix1[4, ] # shows you the fourth row in matrix 1
+matrix1[ , 3] # shows you the third column in matrix 1
+matrix1[c(12, 14)] #take elements 12 and 14 
+matrix1[c(12:14)] #take elements 12 to 14
+matrix1[2:4, 1:3] #show rows 2 to 4 and columns 1 to 3
 
 cells <- c(1, 26, 24, 68)
 rnames <- c("R1", "R2")
 cnames <- c("C1", "C2") 
 matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
-  dimnames = list(rnames, cnames)) # 
+  dimnames = list(rnames, cnames)) # create matrix containing cells with rnames and cnames as labels 
 matrix4
 
 # Lists ---- 
 list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1
-list1[[2]]
+list1[[2]] #use double square brackets for list, grabbing second element of list
 
 # Data Frames ----
-d <- c(1, 2, 3, 4) # What type of vector?
-e <- c("red", "white", "red", NA) # What type of vector?
-f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
-dataframe1 <- data.frame(d,e,f) #
-names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
+d <- c(1, 2, 3, 4) # What type of vector? numeric
+e <- c("red", "white", "red", NA) # What type of vector? character
+f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector? logical
+dataframe1 <- data.frame(d,e,f) #because it has more than one dimension held in Data not Values
+names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) #view allows you to see it as a tabled, names allowed us to rename  vectors
 
-dataframe1[1:2] # 
-dataframe1[c("ID","Passed")] # 
-dataframe1$Color # 
+dataframe1[1:2] # shows you vectors one through two
+dataframe1[c("ID","Passed")] # shows you vector contents for ID and Passed
+dataframe1$Color # shows you the contents of vector Color (probably the easiest)
 
 ```
 QUESTION: How do the different types of data appear in the Environment tab?
 
-> ANSWER: 
+> ANSWER: Vectors appear under the Values category, while data frames and matrices appear under the Data category.
 
 QUESTION: In the R chunk below, write "dataframe1$". Press `tab` after you type the dollar sign. What happens?
 
-> ANSWER: 
+> ANSWER: the options for which columns are possible to choose show up in a drop-down list.
 
 QUESTION: What happens when a comment in R is followed by "----"?
 
-> ANSWER:
+> ANSWER: You can collapse everything after that line until the next comment where the line is followed by "----"
 
 Advanced: Sequential section headers can be created by using at least four -, =, and # characters.
 
@@ -129,12 +130,12 @@ library(dplyr)
 library(ggplot2)
 
 # Some packages are umbrellas under which other packages are loaded
-#install.packages(tidyverse)
+#install.packages("tidyverse")
 library(tidyverse)
 ```
 What happens in the console when you load a package?
 
-> ANSWER: 
+> ANSWER: It will tell you the URL, content type, and how large the file was.
 
 ## FUNCTIONS
 
