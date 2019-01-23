@@ -1,0 +1,96 @@
+---
+title: "Assignment 2: Coding Basics"
+author: "Lindsay Roth"
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Environmental Data Analytics (ENV872L) on coding basics in R. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+2. Use the lesson as a guide. It contains code that can be modified to complete the assignment.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+Space for your answers is provided in this document and is indicated by the ">" character.
+If you need a second paragraph be sure to start the first line with ">".
+You should notice that the answer is highlighted in green by RStudio. 
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+You will need to have the correct software installed to do this (see Software Installation Guide)
+Press the `Knit` button in the RStudio scripting panel.
+This will save the PDF output in your Assignments folder.
+8. After Knitting, please submit the completed exercise (PDF file) to the dropbox in Sakai. Please add your last name into the file name (e.g., "Salk_A02_CodingBasics.pdf") prior to submission.
+
+The completed exercise is due on Thursday, 24 January, 2019 before class begins.
+
+## Basics Day 1
+
+1. Generate a sequence of numbers from one to 100, increasing by fours. Assign this sequence a name. 
+
+2. Compute the mean and median of this sequence. 
+
+3. Ask R to determine whether the mean is greater than the median. 
+
+4. Insert comments in your code to describe what you are doing.
+
+```{r}
+#1
+sequence1 <- seq(1,100,4) #I am creating a sequence from 1 to 100 by 4s and naming it "sequence1"
+
+#2
+mean(sequence1) #Answer: 49 ; I am asking R to calculate the mean of sequence1
+median(sequence1) #Answer: 49 ; I am asking R to find the median of sequence1
+
+#3
+mean(sequence1) > median(sequence1) #Answer: FALSE ; I am asking R to verify if the mean of sequence1 is greater than the median of sequence1
+
+```
+
+## Basics Day 2
+
+5. Create a series of vectors, each with four components, consisting of (a) names of students, (b) test scores out of a total 100 points, and (c) whether or not they have passed the test (TRUE or FALSE) with a passing grade of 50.
+
+6. Label each vector with a comment on what type of vector it is.
+
+7. Combine each of the vectors into a data frame. Assign the data frame an informative name.
+
+8. Label the columns of your data frame with informative titles.
+
+```{r}
+#5
+Names <- c("Martha", "Jackson", "Billy", "Quinn") # Character vector
+Test.scores <- c(67, 85, 49, 98) # Numeric vector
+Pass <- c(TRUE, TRUE, FALSE, TRUE) # Logical vector
+
+#7
+Class.Results <- data.frame(Names, Test.scores, Pass) #assigning vectors to dataframe
+names(Class.Results) <- c("Name", "Test Score", "Pass/Fail") #Labelling vectors in dataframe
+
+
+```
+
+9. QUESTION: How is this data frame different from a matrix?
+
+> ANSWER: A dataframe is more general than a matrix and can have different types of vectors within it, while a matrix has to have the same type of data throughout.
+
+10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. The name of your function should be informative.
+
+11. Apply your function to the vector with test scores that you created in number 5. 
+
+```{r}
+#10
+pass.fail <- function(x){
+  if (x > 50) {"Pass"}
+  else {"Fail"}
+} #I created a function that if the score is greater than 50, the answer will be "Pass" and if it is not greater than 50, the answer will be "Fail"
+
+#10
+pass.fail(5) # When putting in a score of 5 into the pass.fail function, the result is "Fail"
+
+```
+
+12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
+
+> ANSWER: The option of doing 'if' first and then 'else' worked because it is a binary result, meaning that if you do not pass than the only other option is to fail.
