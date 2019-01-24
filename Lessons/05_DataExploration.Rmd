@@ -101,27 +101,27 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
                               "gage.height.max", "gage.height.max.approval", 
                               "gage.height.min", "gage.height.min.approval", 
                               "gage.height.mean", "gage.height.mean.approval")
-str(USGS.flow.data)
-dim(USGS.flow.data)
-length(USGS.flow.data)
+str(USGS.flow.data) #structure
+dim(USGS.flow.data) #dimensions rows and columns
+length(USGS.flow.data) #number of columns
 
-head(USGS.flow.data)
-head(USGS.flow.data, 10)
-tail(USGS.flow.data, 5)
-USGS.flow.data[30000:30005, c(3, 8, 14)]
+head(USGS.flow.data) #shows first couple of rows of each column
+head(USGS.flow.data, 10) 
+tail(USGS.flow.data, 5) #shows last five rows of each column
+USGS.flow.data[30000:30005, c(3, 8, 14)] #give me rows 30000 to 30005 and columns 3, 8, and 14
 
 class(USGS.flow.data$datetime)
 class(USGS.flow.data$discharge.mean)
 class(USGS.flow.data$gage.height.mean)
 
-summary(USGS.flow.data)
+summary(USGS.flow.data) #gives some basic statistics about numerical data
 summary(USGS.flow.data$discharge.mean)
 summary(USGS.flow.data$gage.height.mean)
 
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> ANSWER: 
+> ANSWER: they were registered as NAs
 
 ## TIPS AND TRICKS: SPREADSHEETS
 
