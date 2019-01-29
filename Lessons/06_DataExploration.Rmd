@@ -91,17 +91,18 @@ USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
 
 ```{r}
-# 
+# Changes the format of the date to two digit year two digit month day
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
-#
+#makes function so that all data points after date december 31 2018 (like the year 2024) are changed to 19 as first two numbers of year instead of 20. paste0 ammends the beginning of vectors
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
-#
+
+#applies function to the datetime column of the dataframe
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#
+#changes the format of the year in the data frame to be four digit year two digit month day
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
 
 ```
@@ -119,9 +120,12 @@ Question: What types of research questions might make it favorable to remove NAs
 > Answer: 
 
 ```{r}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) #removes entire row that contains NA
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
+
+#complete.cases will tel you which cases are complete (up to 1000 rows)
+
 
 mean(USGS.flow.data.complete$discharge.mean)
 sd(USGS.flow.data.complete$discharge.mean)
@@ -142,6 +146,8 @@ Visualize count data for categorical variables.
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean.approval)) +
   geom_bar()
+#geom_bar gives a bar graph 
+#aes is aesthetics 
 ```
 
 ### Histogram (function: geom_histogram)
@@ -149,24 +155,24 @@ ggplot(USGS.flow.data.complete, aes(x = discharge.mean.approval)) +
 Visualize distributions of values for continuous numerical variables. What is happening in each line of code? Insert a comment above each line.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#automatically makes 30 bins.  aes can be in ggplot or geom_histogram
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean))
 
-#
+#bars become narrower, divided by 10 cubic meters 
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), binwidth = 10)
 
-#
+#this specifies the number of bins we want the histogram to have and divide accordingly
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), bins = 20)
 
-#
+#creates bins divided by 10 cubic meters and only goes up to 500 cubic meters. scale_x_continuous limits the scale of the x axis 
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean)) +
   geom_histogram(binwidth = 10) + 
   scale_x_continuous(limits = c(0, 500))
   
-#
+#uses gage height instead of discharge
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = gage.height.mean))
 
@@ -176,14 +182,14 @@ ggplot(USGS.flow.data.complete) +
 An alternate to a histogram is a frequency polygon graph (distributions of values for continuous numerical variables). Instead of displaying bars,  counts of continuous variables are displayed as lines. This is advantageous if you want to display multiple variables or categories of variables at once.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#three frequency polygons: one for mean, min, and max. if you don't specify color all will be black
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "blue") +
   geom_freqpoly(aes(x = gage.height.max), bins = 50, color = "red") +
   scale_x_continuous(limits = c(0, 10))
 
-#
+#more measurements approved than pending, color is in aes and based on status of other variable
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
@@ -205,22 +211,22 @@ A box-and-whisker plot is yet another alternative to histograms (distributions o
 An alternate option is a violin plot, which displays density distributions, somewhat like a hybrid of the box-and-whiskers and the frequency polygon plot.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#splitting up height means based on approval and giving quantiles for each
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
 
-#
+#splitting up discharge means by gage height means by 1 unit for each height. take gage height mean, divide it by units of one, and make box plots of discharge based on those heights
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
 
-#
+#the greater the amount of samples, the wider the violin, drawing lines at the quantiles 
 ggplot(USGS.flow.data.complete) +
   geom_violin(aes(x = gage.height.mean.approval, y = gage.height.mean), draw_quantiles = c(0.25, 0.5, 0.75))
 ```
 
 Question: what are the pros and cons of each type of frequency graph (histogram, frequency polygon, box-and whisker, violin)?
 
-> Answer: 
+> Answer: Histograms are good for data distributed more evenly and good for seeing trends and distribution, frequency polygons are good for comparing descriptive statistics of same data, box and whisker are good for identifying trends of data and distribution. Violin looks cool.
 
 
 ### Scatterplot (function: geom_point)
