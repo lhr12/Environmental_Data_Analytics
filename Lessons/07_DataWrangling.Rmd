@@ -1,5 +1,5 @@
 ---
-title: "6: Data Exploration"
+title: "7: Data Wrangling"
 author: "Environmental Data Analytics | Kateri Salk"
 date: "Spring 2019"
 output: pdf_document
@@ -24,6 +24,7 @@ In assignment 3, you explored the North Temperate Lakes Long-Term Ecological Res
 We will continue working with this dataset today. 
 
 ```{r}
+#getting raw datasets into format we will use in data analysis: data wrangling; manipulating datasets into form that we want them
 getwd()
 library(tidyverse)
 NTL.phys.data <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
@@ -60,24 +61,26 @@ Filtering allows us to choose certain rows (observations) in our dataset.
 
 A few relevant commands: 
 `==`
-`!=`
+`!=` #is not equal to
 `<`
 `<=`
 `>`
 `>=`
 `&`
-`|`
+`|` #or command. The vertical dash underneath the delete button
 
 ```{r}
-class(NTL.phys.data$lakeid)
+class(NTL.phys.data$lakeid) #categorical variable
 class(NTL.phys.data$depth)
 
 # matrix filtering
-NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #comma means you're selecting rows for matrix subsetting. blank after comma means chosing all columns
 
 # dplyr filtering
-NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
+NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0) 
 NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
+#new row names get created, matrix subsetting keeps old row names
+
 
 # Did the methods arrive at the same result?
 head(NTL.phys.data.surface1)
@@ -90,52 +93,62 @@ dim(NTL.phys.data.surface3)
 # Choose multiple conditions to filter
 summary(NTL.phys.data$lakename)
 NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+#lakename equals "Paul Lake" or lakename equals "Peter Lake".  Don't use "and" because there are no cells that contain both Paul Lake and Paul Lake
 NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
                                      lakename != "Crampton Lake" & lakename != "East Long Lake" &
                                      lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
                                      lakename != "Ward Lake" & lakename != "West Long Lake")
 NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
+# %in% means include 
+# use "or" operator to include things, use "and" operator to exclude things
 
 # Choose a range of conditions of a numeric or integer variable
 summary(NTL.phys.data$daynum)
 NTL.phys.data.JunethruOctober1 <- filter(NTL.phys.data, daynum > 151 & daynum < 305)
-NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305)
+NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305) #and or comma will give same result
 NTL.phys.data.JunethruOctober3 <- filter(NTL.phys.data, daynum >= 152 & daynum <= 304)
 NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
+#can make multiple conditions in same line for different columns
 
 # Exercise: 
 # filter NTL.phys.data for the year 1999
-# what code do you need to use, based on the class of the variable?
+# what code do you need to use, based on the class of the variable? If you have a factor you have to put it in "", for numerical you do not have to
 class(NTL.phys.data$year4)
+NTL.phys.data.1999 <- filter(NTL.phys.data, year4 == 1999)
 
 # Exercise: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
-
+NTL.phys.data.90to99.Tuesday <- filter(NTL.phys.data, year4 >= 1990 & year4 <= 1999, lakename == "Tuesday Lake")
 
 ```
 Question: Why don't we filter using row numbers?
-> ANSWER: 
+
+> ANSWER: For super large datasets, row numbers can get confusing and hard to manage.  They also do not give you a lot of information and you have to manually inspect the rows to find out which ones you need to include/exclude. dplyer constantly renames rows so row assignments will not be consistend as you wrangle. Not as reproducible 
 
 ### Arrange
 
 Arranging allows us to change the order of rows in our dataset. By default, the arrange function will arrange rows in ascending order.
 
 ```{r}
-NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth)
+NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth) #default arranges in ascending order
 NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
 # Arrange NTL.phys.data by temperature, in descending order. 
 # Which dates, lakes, and depths have the highest temperatures?
+NTL.phys.data.temp.descending <- arrange(NTL.phys.data, desc(temperature_C))
 
-
+#East Long Lake, Hummingbird Lake, West Long Lake, Central Long Lake, Paul Lake, Tuesday Lake
+#Dates mostly in June and July
+#Depths from 0.0-1.0
 ```
 ### Select
 
 Selecting allows us to choose certain columns (variables) in our dataset.
 
 ```{r}
-NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
+NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C) #choose lakename to include, and also inlcude all columns between and including sampledate and temperature_C. for select only want to use commas and colons
+
 
 ```
 ### Mutate
@@ -144,7 +157,7 @@ Mutating allows us to add new columns that are functions of existing columns. Op
 
 ```{r}
 
-NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
+NTL.phys.data.temps2 <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
 
 ```
 ### Pipes
@@ -159,6 +172,8 @@ NTL.phys.data.processed <-
   filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
   select(lakename, sampledate:temperature_C) %>%
   mutate(temperature_F = (temperature_C*9/5) + 32)
+
+#use raw dataset THEN only include paul and peter lake THEN select lakename, sampledata:temperature_C columns THEN create new column with mutate.
   
 ```
 
@@ -168,6 +183,10 @@ Notice that we did not place the dataset name inside the wrangling function but 
 
 ```{r}
 write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+
+#if you have row.names = TRUE, then the first column in the dataframe will just be a column of numbers
+#./ dot means down one into the Data folder
+#comment out the write.csv so you don't overwrite it every time you run your code
 ```
 
 ## CLOSING DISCUSSION
