@@ -17,7 +17,7 @@ summary(ecotox.neonic$Chemical.Name)
 summary(ecotox.neonic$Pub..Year)
 
 # Fix formatting of column names (spaces originally present were turned to periods upon import)
-colnames(ecotox.neonic)[8:12] <- c(Duration, Conc.Type, Conc.Mean, Conc.Units, Pub.Year)
+colnames(ecotox.neonic)[8:12] <- c(Dur.Std, Conc.Type, Conc.Mean, Conc.Units, Pub.Year)
 
 # Plot histogram of counts of publication years
 ggplot(ecotox.neonic, aes(x = Pub.Year)) 
