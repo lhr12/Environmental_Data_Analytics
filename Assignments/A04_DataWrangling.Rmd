@@ -60,7 +60,7 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 7. Combine the four datasets with `rbind`. Make sure your column names are identical prior to running this code. 
 8. Wrangle your new dataset with a pipe function (%>%) so that it fills the following conditions: 
 
-* Sites: Blackstone, Bryson City, Castle Hayne, Leggett, Triple Oak
+* Sites: Blackstone, Bryson City, Triple Oak
 * Add columns for "Month" and "Year" by parsing your "Date" column (hint: `separate` function or `lubridate` package)
 
 9. Spread your datasets such that AQI values for ozone and PM2.5 are in separate columns. Each location on a specific date should now occupy only one row.
