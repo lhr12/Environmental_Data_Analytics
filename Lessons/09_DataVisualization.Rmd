@@ -154,9 +154,9 @@ print(tempvsdepth)
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
-  geom_point() #+
-  #geom_smooth(method = lm) +
-  #geom_abline(aes(slope = 16, intercept = 0))
+  geom_point() +
+  geom_smooth(method = lm) + #need method = linear model to make it straight line, otherwise will just try to minimize error and line gets curvy
+  geom_abline(aes(slope = 16, intercept = 0), lty = 2) #lty = line type, outside aes
 print(NvsP)
 
 # Exercise: Plot relationships between air quality measurements
@@ -165,6 +165,11 @@ print(NvsP)
 # Plot AQI values for ozone by PM2.5, colored by site. 
 # Add a line of best fit for the linear regression of these variables.
 
+AQIPlot <- 
+  ggplot(EPAair, aes(x = PM2.5, y = Ozone, color = Site.Name)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(AQIPlot)
   
 ```
 
@@ -173,24 +178,23 @@ print(NvsP)
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
  # Barplot + error bars
 PeterPaul.nutrient.summaries <- PeterPaul.nutrients.gathered %>%
-  group_by(lakename, nutrient) %>%
+  group_by(lakename, nutrient) %>% #if you want it to group by multiple different factors, you have to do it in the same function.  if you do it seperately, the lowest one will override the previous ones
   summarise(sd = sd(concentration), 
             mean = mean(concentration))
 
 Nutrientplot <- 
   ggplot(PeterPaul.nutrients.gathered) +
-  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill?
-           position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here?
+  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill? will border bars in colors, but inside will be black if we use color = 
+           position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here? position = "dodge" spreads out into multiple bars, otherwise would be stacked
 print(Nutrientplot)
 
 Nutrientplot2 <- 
   ggplot(PeterPaul.nutrient.summaries, aes(x = lakename, y = mean, fill = as.factor(nutrient))) + #
-  geom_bar(stat = "identity", position = "dodge") + # what does the stat command do?
-  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), # how do we specify error bars?
-                 position = "dodge")
+  geom_bar(stat = "identity", position = "dodge") + # what does the stat command do? since we had already calculated the mean in our summary dataset, so we will just take the identity of whatever cell it's pointing at
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd),position = "dodge") # how do we specify error bars? sd and mean are already part of dataset, would otherwise have to define something that represented mean and stdev
 print(Nutrientplot2)
 
-# Are there more effective ways to produce summary stats for categories?
+# Are there more effective ways to produce summary stats for categories? error bars completely inaccurate, nutrient levels cannot go below zero
 
 # Box and whiskers plot
 Nutrientplot3 <-
@@ -220,7 +224,7 @@ Nutrientplot6 <-
   geom_freqpoly(aes(x = nh34), color = "darkgray") +
   geom_freqpoly(aes(x = no23), color = "gray") +
   geom_freqpoly(aes(x = po4), color = "blue") 
-print(Nutrientplot6)
+print(Nutrientplot6) #if you don't specify colors, they will all be black
 
 # Using a gathered dataset
 Nutrientplot7 <-   
@@ -232,7 +236,18 @@ print(Nutrientplot7)
 
 # 1. 
 # Create a bar chart plus standard deviation error bars for PM2.5, divided by year. 
-# Create separate bars for each site. 
+# Create separate bars for each site
+
+EPAairsummary <- EPAair %>%
+  group_by(Site.Name,year) %>%
+  summarise(mean = (mean(PM2.5, na.rm = TRUE)), 
+            sd = (sd(PM2.5, na.rm = TRUE)))
+
+Nutrientplot7 <-
+  ggplot(EPAairsummary, aes(x = as.factor(year), y = mean, fill = Site.Name)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean+sd), position = "dodge")
+print(Nutrientplot7)
 
 # 2. 
 # Create a new plot that better depicts the distribution of PM2.5 concentrations. 
