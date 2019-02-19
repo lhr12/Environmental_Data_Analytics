@@ -1,0 +1,157 @@
+---
+title: "Assignment 5: Data Visualization"
+author: "Lindsay Roth"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Environmental Data Analytics (ENV872L) on data wrangling. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+2. Use the lesson as a guide. It contains code that can be modified to complete the assignment.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+Space for your answers is provided in this document and is indicated by the ">" character.
+If you need a second paragraph be sure to start the first line with ">".
+You should notice that the answer is highlighted in green by RStudio. 
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+You will need to have the correct software installed to do this (see Software Installation Guide)
+Press the `Knit` button in the RStudio scripting panel.
+This will save the PDF output in your Assignments folder.
+8. After Knitting, please submit the completed exercise (PDF file) to the dropbox in Sakai. Please add your last name into the file name (e.g., "Salk_A04_DataWrangling.pdf") prior to submission.
+
+The completed exercise is due on Tuesday, 19 February, 2019 before class begins.
+
+## Set up your session 
+1. Set up your session. Upload the NTL-LTER processed data files for chemistry/physics for Peter and Paul Lakes (tidy and gathered), the USGS stream gauge dataset, and the EPA Ecotox dataset for Neonicotinoids. 
+
+2. Make sure R is reading dates as date format, not something else (hint: remember that dates were an issue for the USGS gauge data).
+
+```{r}
+#1
+getwd()
+library(tidyverse)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+library(lubridate)
+library(gridExtra)
+
+PeterPaul.nutrients.gathered <-
+  read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+
+PeterPaul.nutrients.spread <- 
+  read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
+USGS.Stream <-
+  read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+
+EPA.Ecotox <- 
+  read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+
+#2
+class(PeterPaul.nutrients.gathered$sampledate)
+PeterPaul.nutrients.gathered$sampledate <- 
+  as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
+
+class(USGS.Stream$datetime)
+USGS.Stream$datetime <- as.Date(USGS.Stream$datetime, format = "%m/%d/%y")
+USGS.Stream2 <- USGS.Stream %>% 
+ filter(year(datetime) > 2004 & year(datetime) < 2028)
+
+class(EPA.Ecotox$Pub..Year)
+
+```
+## Define your theme
+3. Build a theme and set it as your default theme.
+
+```{r}
+#3
+mytheme <- theme_classic(base_size = 12) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right") 
+theme_set(mytheme)
+```
+
+## Create graphs
+For numbers 4-7, create graphs that follow best practices for data visualization. To make your graphs "pretty," ensure your theme, color palettes, axes, and legends are edited to your liking.
+
+Hint: a good way to build graphs is to make them ugly first and then create more code to make them pretty.
+
+4. NTL-LTER Plot total phosphorus by phosphate, with separate aesthetics for Peter and Paul lakes. Add a line of best fit and color it black.
+
+```{r}
+#4
+Plot4 <- 
+  ggplot(PeterPaul.nutrients.spread, aes(x = po4 , y = tp_ug, color = lakename)) + 
+  geom_point() +
+  scale_color_manual(values = c("#7fcdbb", "#2c7fb8")) +
+  scale_shape_manual(values = c(15, 17)) +
+  geom_smooth(method = lm, color = "black") +
+  labs(x = "Phosphate micro g/L", y = "Total P, micro g/L", color = "Lake") + 
+  xlim(0, 50) +
+  ylim(0, 150) +
+  ggtitle("Total Phosphorus by Phosphate, Peter and Paul Lakes")
+print(Plot4)
+
+```
+
+
+5. NTL-LTER Plot nutrients by date for Peter Lake, with separate colors for each depth. Facet your graph by the nutrient type.
+
+```{r, fig.height=9}
+#5
+levels(PeterPaul.nutrients.gathered$nutrient) <- c("Nitrate","Nitrite","Phosphate","Total Nitrogen", "Total Phosphorus")
+Plot5 <-
+  ggplot(PeterPaul.nutrients.gathered, aes(x = sampledate, y = concentration, color = depth)) + 
+  geom_point() +
+  scale_color_viridis(direction = -1) +
+  facet_wrap(vars(nutrient), nrow = 5, scales ="free") +
+  labs(x = "Date", y ="Concentration (micro g/L)", color = "Depth") +
+  ggtitle("Nutrient Concentrations Over Time by Depth")
+print(Plot5)
+
+```
+
+
+6. USGS gauge Plot discharge by date. Create two plots, one with the points connected with geom_line and one with the points connected with geom_smooth (hint: do not use method = "lm"). Place these graphs on the same plot (hint: ggarrange or something similar)
+
+```{r}
+#6
+Plot6 <- 
+  ggplot(USGS.Stream2, aes(x = datetime , y = X84936_00060_00003)) +
+  geom_point() +
+  geom_smooth(color = "red") +
+  labs(x = "Date", y = "Discharge (cubic feet per second)")
+
+
+Plot6.1 <- 
+  ggplot(USGS.Stream2, aes(x = datetime , y = X84936_00060_00003)) +
+  geom_line() +
+  labs(x = "Date", y = "Discharge (cubic feet per second)")
+
+
+grid.arrange(Plot6, Plot6.1, nrow = 1, top = "Discharge Over Time")
+```
+Question: How do these two types of lines affect your interpretation of the data?
+
+> Answer:
+
+7. ECOTOX Neonicotinoids Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
+
+```{r, fig.height=8.5, fig.width=10}
+#7 
+Plot7 <-
+  ggplot(EPA.Ecotox, aes(x = Chemical.Name, y = Conc..Mean..Std., fill = Chemical.Name)) +
+  geom_boxplot() +
+  ylim(0, 8500) +
+  labs(x = "Chemical", y = "Mean Concentration")
+print(Plot7)
+```
+
+
