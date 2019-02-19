@@ -73,18 +73,20 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 summary(EPAair$Ozone)
 
 # Evaluate assumption of normal distribution
-shapiro.test(EPAair$Ozone)
+shapiro.test(EPAair$Ozone) #if the p-value is less than 0.05, the dataset is not normally distributed
 ggplot(EPAair, aes(x = Ozone)) +
-  geom_histogram(stat = "count")
-qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
+  geom_histogram(stat = "count") #frequently see long right tails in environmental datasets
+qqnorm(EPAair$Ozone); qqline(EPAair$Ozone) #if points not on line, show departure from normality
+#run one-sample t-test because points do follow line for most of distribution
 
 O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
-O3.onesample
+O3.onesample #low p-value => reject null hypothesis, t score => further from zero, lower probability will be
 ```
 
 What information does the output give us? How might we report this information in a report?
 
 > ANWSER:
+For the years 2017-2018, the mean ozone AQI values were significantly lower than 50 (one sample t-test; t = -41.9, df = 1084, p <0.0001). We are 95% confident that the true mean lies between negative infinity and 37.43.
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between Blackstone and Bryson City?
@@ -92,14 +94,14 @@ The two-sample *t* test is used to test the hypothesis that the mean of two samp
 ```{r}
 shapiro.test(EPAair$Ozone[EPAair$Site.Name == "Blackstone"])
 shapiro.test(EPAair$Ozone[EPAair$Site.Name == "Bryson City"])
-var.test(EPAair$Ozone ~ EPAair$Site.Name)
+var.test(EPAair$Ozone ~ EPAair$Site.Name) #now that we are comparing to populations, want to see if variances similar or not, if p<0.05, the variances are not the same
 
 ggplot(EPAair, aes(x = Ozone, color = Site.Name)) +
   geom_freqpoly(stat = "count")
 
 # Format as a t-test
 O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Site.Name)
-O3.twosample
+O3.twosample #reject the null hypothesis that the means were the same for the two groups
 O3.twosample$p.value
 
 # Format as a GLM
@@ -130,7 +132,7 @@ ggplot(EPAair, aes(x = PM2.5, color = Site.Name)) +
   geom_freqpoly(stat = "count")
 qqnorm(EPAair$PM2.5); qqline(EPAair$PM2.5)
 
-bartlett.test(EPAair$PM2.5 ~ EPAair$Site.Name)
+bartlett.test(EPAair$PM2.5 ~ EPAair$Site.Name) #var.test will only do two at a time, this will do more than 2
 
 # Format as a GLM
 PM2.5.anova <- lm(EPAair$PM2.5 ~ EPAair$Site.Name)
@@ -141,7 +143,7 @@ PM2.5.anova2 <- aov(EPAair$PM2.5 ~ EPAair$Site.Name)
 summary(PM2.5.anova2)
 
 # Run a post-hoc test for pairwise differences
-TukeyHSD(PM2.5.anova2)
+TukeyHSD(PM2.5.anova2) #can only run tukeyHSD on an aov, not lm; look at p values to see which ones are significantly different from each other
 
 # Plot the results
 # How might you edit this graph to make it attractive?
@@ -152,7 +154,7 @@ print(PM2.5.anova.plot)
 ```
 What information does the output give us? How might we report this information in a report?
 
-> ANSWER:
+> ANSWER: Want to show that blackstone and bryson city are different, blackstone and triple oak are different, but bryson and triple oak are not different. Blackstone has higher PM 2.5 values than bryson and triple oak (ANOVA; F = 16.16, df = 1898, p <0.0001)
 
 ### Non-parametric equivalent of ANOVA: Kruskal-Wallis Test
 As with the Wilcoxon test, the Kruskal-Wallis test is the non-parametric counterpart to the one-way ANOVA. Here, the data from two or more independent samples are replaced with their ranks without regard to the grouping AND based on the between-group sum of squares calculations. 
@@ -215,6 +217,7 @@ Pairs are considered to be in the same grouping if the p-value for that pairing 
 Run the same tests and visualizations (main and interaction effects two-way ANOVA) for total phosphorus concentrations. How do your results compare for the different nutrients?
 
 ```{r}
+#install.packages("multcomp")
 
 ```
 
