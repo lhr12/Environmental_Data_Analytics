@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: Generalized Linear Models"
-author: "Student Name"
+author: "Lindsay Roth"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,8 +34,20 @@ The completed exercise is due on Tuesday, 26 February, 2019 before class begins.
 
 ```{r}
 #1
+getwd()
+library(tidyverse)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+
+Ecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+NTL.chem.physics <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 
 #2
+lindsay_theme <- theme_classic(base_size = 12) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right") 
+theme_set(lindsay_theme)
 
 ```
 
@@ -50,31 +62,63 @@ Research question: Were studies on various neonicotinoid chemicals conducted in 
 
 ```{r}
 #3
+unique(Ecotox$Chemical.Name)
+#There are 9 different chemicals in the Chemical.Name column.
 
 #4
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Imidacloprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Thiacloprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Thiamethoxam"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Acetamiprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Clothianidin"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Dinotefuran"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Nitenpyram"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Nithiazine"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Imidaclothiz"])
+#The publication years associated with each chemical are not well approximated 
+#by the normal distribution because all of the p-values resulting from the
+#Shapiro-Wilkes test are less than 0.001
+
+qqnorm(Ecotox$Pub..Year); qqline(Ecotox$Pub..Year)
+Ecotox.Freq <- ggplot(Ecotox, aes(x = Pub..Year, color = Chemical.Name)) +
+  geom_freqpoly(stat = "count")
+print(Ecotox.Freq)
 
 #5
+bartlett.test(Ecotox$Pub..Year ~ Ecotox$Chemical.Name)
+#There is not equal variance among the publication years for each chemical (p<0.001).
 
 ```
 
 6. Based on your results, which test would you choose to run to answer your research question?
 
-> ANSWER: 
+> ANSWER: Because the distribution of the data is not normal, I would run a non-parametric test to see if the studies on the various chemicals were conducted in different years.  Since the variables are both categorical and there are more than 2, I will use the non-paramentric ANOVA test, Kruskal-Wallis.
 
 7. Run this test below. 
 
 8. Generate a boxplot representing the range of publication years for each chemical. Adjust your graph to make it pretty.
 ```{r}
 #7
+Ecotox.test <- kruskal.test(Ecotox$Pub..Year ~ Ecotox$Chemical.Name)
+Ecotox.test
+#There is a significant difference between the publication years of each chemical 
+#(ANOVA, Kruskal-Wallis; df = 8, p<0.001)
 
 #8
+Ecotox.plot <- 
+  ggplot(Ecotox, aes(x = Chemical.Name, y = Pub..Year, color = Chemical.Name)) +
+  geom_boxplot() +
+  scale_color_brewer(palette = "Paired") +
+  labs(x = "Chemical Name", y = "Publication Year", color = "Chemical Name") +
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1)) 
+print(Ecotox.plot)
 
 ```
 
 
 9. How would you summarize the conclusion of your analysis? Include a sentence summarizing your findings and include the results of your test in parentheses at the end of the sentence. 
 
-> ANSWER: 
+> ANSWER: Studies on various neonicotinoid chemicals were conducted in significantly different years (ANOVA, Kruskal-Wallis;X^2 = 134.15, df = 8, p<0.001).
 
 ## NTL-LTER test
 Research question: What is the best set of predictors for lake temperatures in July across the monitoring period at the North Temperate Lakes LTER? 
@@ -89,30 +133,49 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 ```{r}
 #11
-
+NTL.wrangled <-
+  NTL.chem.physics %>%
+  filter(daynum > 182 & daynum < 214) %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  na.omit()
+  
 #12
-
+NTL.test <- lm(data = NTL.wrangled, temperature_C ~ year4 + daynum + depth)
+step(NTL.test)
+summary(NTL.test)
 ```
 
 13. What is the final linear equation to predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> ANSWER: 
+> ANSWER: Temperature = -5.3 + 0.009(year) + 0.04(daynum) - 1.9(depth)
+> This model explains 73.97% of the variation in temperature for the lakes in July. 
 
 14. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #14
-
+NTL.interact <- lm(data = NTL.wrangled, temperature_C ~ depth*lakename)
+step(NTL.interact)
+summary(NTL.interact)
 ```
 
 15. Is there an interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> ANSWER: 
+> ANSWER: There is a significant interaction between depth and lakename.  This model explains 78.61% of the variation in tempearture observations. 
 
 16. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
 #16
-
+NTL.plot <-
+  ggplot(NTL.wrangled, aes(x = depth, y = temperature_C, color = lakename)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) + 
+  ylim(0,35) +
+  labs(x = "Depth", y = "Temperature", color = "Lake Name")+
+  scale_color_manual(values = 
+    c("#80cdc1", "#7fbc41", "#de77ae", "#e08214", "#d6604d", "#4393c3", "#02818a", "#c994c7", "#e31a1c")) 
+print(NTL.plot)
+  
 ```
 
