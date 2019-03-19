@@ -65,7 +65,7 @@ EPAair_PM_avg <- EPAair_PM25_NC2018_raw %>%
 
 #Plot the data using longitude and latitude as X and Y
 ggplot(EPAair_PM_avg, aes(x=SITE_LONGITUDE, y=SITE_LATITUDE)) + 
-  geom_point(aes(color=meanPM), size=4) #+ coord_equal() 
+  geom_point(aes(color=meanPM), size=4) + coord_equal() 
 ```
 
 This is more of a proof of concept than a useful map. We can sort of visualize spatial patterns in the data, but without context of scale or location, it's somewhat difficult. We can greatly improve this map with the help of some mapping packages for R...
@@ -108,7 +108,7 @@ library(leaflet)
 
 #Create the map and add Tiles
 myMap  <- leaflet(data=EPAair_PM_avg) %>% 
-  addTiles() %>% 
+  addTiles() %>% #tiles are background maps, currently using default
   addCircleMarkers(~SITE_LONGITUDE,~SITE_LATITUDE,
                    radius=(~meanPM*2),
                    stroke = FALSE, 
@@ -188,7 +188,7 @@ With our EPA data now spatially enabled, we can perform spatial analysis with th
 #Buffer the Durham Armory point 0.1 degrees
 Durham_buffer <- EPAair_PM_avg_sf %>% 
   filter(Site.Name == 'Durham Armory') %>% 
-  st_buffer(0.1)
+  st_buffer(0.1) #units of 0.1 degrees
 
 #View the result
 mapView(Durham_buffer)
