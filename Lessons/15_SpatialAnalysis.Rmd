@@ -316,23 +316,27 @@ mapView(counties_sf)
 
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
-huc8_sf <-   
+huc8_sf <- st_read('./Data/Spatial/huc_250k_nc.shp')
 
 #Check the CRS
+st_crs(huc8_sf)
 
-
-#Exaimine the column names
-
+#Examine the column names
+names(huc8_sf)
 
 #View the data as a map
-
+mapview(huc8_sf['SUB'], 
+        graticule = st_crs(huc8_sf), #graticule: geographic grid in background
+        axes = TRUE)
 ```
 
 > _Challenge_: Read in the NC 8-Digit HUC dataset again, but this time _filter_ the data so the result only includes the one with a HUC_NAME value of 'Upper Neuse'.
 
 ```{r Select the Upper Neuse HUC 8}
 #Read the shapefile into an sf dataframe
-upperNeuse_sf <-  
+upperNeuse_sf <-  st_read('./Data/Spatial/huc_250k_nc.shp') %>%
+  filter(HUC_NAME == 'Upper Neuse')
+mapview(upperNeuse_sf)
   
 
 ```
@@ -342,22 +346,23 @@ upperNeuse_sf <-
 ```{r Dissolve all counties into a single feature}
 #Aggregate the data using group_by and summarize, just as you would a non-spatial dataframe
 state_sf <- counties_sf %>% 
-  group_by('STATEFP') %>% 
-  summarize(ALAND = sum(ALAND))
+  group_by(STATEFP) %>% 
+  summarize(ALAND = sum(ALAND)) #creates dataframe
 
 #View the data
 mapview(state_sf)
 
 #Alternatively, we could use the `st_union` function
-state_sf2 <- st_union(counties_sf)
+state_sf2 <- st_union(counties_sf) #creates list
 mapview(state_sf2)
 ```
 
 > Now you try it: Aggregate the HUC data on the SUB attribute, computing the sum of the "AREA" field and view the result. 
 
 ```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
-huc2_sf <- 
-  
+huc2_sf <- huc8_sf %>%
+  group_by(SUB) %>%
+  summarize(AREA = sum(AREA))
   
 mapview(huc2_sf)
 ```
@@ -383,7 +388,7 @@ huc8s_WGS84 <- st_transform(huc8_sf,c=4326)
 huc2_WGS84<- st_transform(huc2_sf,c=4326)
 
 #Now plot with leaflet: no errors as all layers are in Leaflet's native CRS (WGS84)
-leaflet() %>% addTiles() %>% 
+leaflet() %>% addTiles() %>%  #leaflet can only use WGS84
   addPolygons(data=counties_WGS84,weight=1,color='red') %>% 
   addPolygons(data=huc8s_WGS84,weight=1)
 ```
@@ -401,6 +406,7 @@ ggplot()  +
   geom_sf(data = counties_sf_utm, aes(fill = ALAND), color = 'white')  +
   geom_sf(data = state_sf_utm, color='red',size=2) + 
   scale_fill_gradient(low="yellow", high="darkgreen")
+#ordering of features important, put base map first and then things on top of that afterwards
 
 #Right order
 ggplot() +
@@ -411,7 +417,7 @@ ggplot() +
 ```
 
 ### leaflet
-Tip: See http://leaflet-extras.github.io/leaflet-providers/ for other basemaps
+Tip: See http://leaflet-extras.github.io/leaflet-providers/preview/ for other basemaps
 ```{r Visualizing multiple datasets with leaflet}
 leaflet() %>% 
   addProviderTiles(providers$Esri.WorldShadedRelief) %>%  
@@ -458,10 +464,12 @@ mapview(huc2_UTM_nc)
 > Exercise: Try subsetting the huc2_UTM dataset for SUB = 0302, then clipping counties with that subset.
 
 ```{r EXERCISE: Clip the counties dataset with the border of HUC 0302}
-huc0302_counties <- 
+huc0302 <- huc2_utm %>% 
+  filter(SUB == '0302')
+huc0302_counties <- st_intersection(counties_sf_utm,huc0302)
   
 #Map the product, showing values by land area
-mapview(huc0302_counties['ALAND'])
+mapview(huc0302_counties['ALAND'], legend = FALSE)
 ```
 
 
@@ -542,10 +550,10 @@ userLat = 36.0045442
 userLng = -78.9426381
 
 #Create a simple features point geometry from the point
-theSite_sfp <- st_point(c(userLng,userLat))
+theSite_sfp <- st_point(c(userLng,userLat)) #sfp = spatial feature point
 
 #Create a simple features column from the point geometry object
-theSite_sfc <- st_sfc(theSite_sfp, crs = 4326)
+theSite_sfc <- st_sfc(theSite_sfp, crs = 4326) #sfc = spatial feature column
 
 #Transform the mask to match the CRS of the counties dataset
 theSite_sfc_transformed <- st_transform(theSite_sfc, crs = st_crs(counties_sf_utm))
